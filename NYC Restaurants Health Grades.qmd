@@ -6,26 +6,47 @@ editor: visual
 
 # Introduction
 
-Hello! This is my first github upload as part of a class assignment. I have come across github in many other situations in the past and am glad for an opportunity to finally familiarize myself with it.
+This project investigates the 2025 New York City Restaurant Inspection Results data from NYC OpenData. I love trying new restaurants in the city and am adamant that the places we go to pass their health grades! As a first step, I would like to understand the breakdown of grades for restaurants in my neighborhood (as defined by being in the same area code) and identify the restaurants to avoid.
 
-## Approach
+\*Source file: <https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j/about_data>
 
-I plan to investigate the New York City Restaurant Inspection Results data from NYC OpenData. I love trying new restaurants in the city and am adamant that the places we go to pass their health grades! I came across this database last smester and glad to have an chance to explore it in this course.
+```{r}
+nyc_restaurant_grades <- read.csv("https://raw.githubusercontent.com/JessChen0/my-first-project/refs/heads/main/DOHMH_New_York_City_Restaurant_Inspection_Results_2025.csv")
+```
 
-Link to source file: <https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j/about_data>
+## Analysis
 
-## Process
+### Restaurant Grades in 10029 area code (in 2025)
 
-My planned process is as follows:
+```{r}
+library(dplyr)
+library(janitor)
+library(tidyverse)
+library(knitr)
 
-\(1\) Download the dataset and evaluate which columns I would like to include for this project. (A brief glimpse suggests the borough, grade, score, and maybe a few others)
+nyc_restaurant_grades_cleaned <- nyc_restaurant_grades %>% filter(ZIPCODE=="10029")
+nyc_restaurant_grades_cleaned <- nyc_restaurant_grades_cleaned %>% clean_names() 
+nyc_restaurant_grades_cleaned <- nyc_restaurant_grades_cleaned[c("dba","boro","cuisine_description","grade","council_district")]
+nyc_restaurant_grades_cleaned <- unique(nyc_restaurant_grades_cleaned)
+nyc_restaurant_grades_cleaned %>% count(grade)
+```
 
-\(2\) Figure out how to post the dataset on Github.
+### Restaurant Grades in 10029 area code (in 2025) graph
 
-\(3\) Create quarto document with subset of data per assignment.
+```{r}
+ggplot(nyc_restaurant_grades_cleaned, aes(x=grade)) + geom_bar(fill="blue") + ggtitle(paste0("Restaurant Grades in zip code 10029 (2025)"))
+```
+Where N = not graded yet, P and Z = pending.
 
-\(4\) Time permitting, work with gemini to explore data and create visualizations as appropriate.
+### List of C grade restaurants to avoid!
 
-## Anticipated Challenges
+```{r}
+nyc_restaurants_c_only <- nyc_restaurant_grades_cleaned %>% filter(grade=="C"|grade=="B")
+nyc_restaurants_c_only %>% select(dba,cuisine_description,grade)
+```
 
-I have not used Quarto and Github in the past so anticipate that could be a challenge. If time permits, I would also like to sign up and familiarize myself with publishing to rpubs.com.
+## Conclusions
+
+In this project, I have confirmed that majority of restaurants in my neighbourhood have A grades.  Furthermore, I have identified the 20 grade B and C restaurants that I plan to avoid due to their violations.  
+
+If time allows, further analysis of violation types, grade distributions compared with other neighborhoods and boroughs would be interesting.
